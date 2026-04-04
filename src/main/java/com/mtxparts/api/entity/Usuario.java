@@ -1,5 +1,6 @@
 package com.mtxparts.api.entity;
 
+import com.mtxparts.api.role.Rol;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -14,4 +15,6 @@ public class Usuario {
     private String nombre_completo;
     private String email;
     private String password;
+    private Rol rol;
+
 }
