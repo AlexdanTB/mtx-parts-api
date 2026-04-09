@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Archivo de contexto del agente
+AGENTS.md
+
+# Carpeta de habilidades (habilidades instaladas o locales)
+skills/

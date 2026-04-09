@@ -2,7 +2,8 @@ package com.mtxparts.api.type;
 
 public enum StatusPedido {
     PENDIENTE,
-    PAGADO,
+    PROCESANDO,
+    ENVIADO,
     ENTREGADO,
-    ANULADO
+    CANCELADO
 }
