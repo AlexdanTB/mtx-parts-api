@@ -1,14 +1,16 @@
 package com.mtxparts.api.service;
 
+
 import com.mtxparts.api.entity.Usuario;
 import com.mtxparts.api.repository.UsuarioRepository;
 import com.mtxparts.api.role.Rol;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,17 +18,21 @@ import java.util.Optional;
 @Service
 public class UsuarioService implements UserDetailsService {
 
+    //INYECCION DE DEPENDENCIA POR CAMPO
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    //ENCRIPTAR LA CONTRASEÑA
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public List<Usuario> leerUsuarios() {
+    //LEER
+    public List<Usuario> leerUsuario(){
         return usuarioRepository.findAll();
     }
 
-    public Optional<Usuario> buscarUsuarioPorId(Long id) {
+    //BUSCAR POR ID
+    public Optional<Usuario> buscarUsuarioPorId(Long id){
         return usuarioRepository.findById(id);
     }
 
@@ -34,69 +40,74 @@ public class UsuarioService implements UserDetailsService {
         return usuarioRepository.findByEmail(email);
     }
 
-    public Usuario guardarUsuario(Usuario usuario) {
-        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo ya está registrado");
-        }
+    //GUARDAR
+    public Usuario guardarUsuario(Usuario usuario){
+        //ENCRIPTAR LA CONTRASEÑA QUE EL USUARIO INGRESE AL REGISTRARSe
         String passwordEncriptada = passwordEncoder.encode(usuario.getPassword());
         usuario.setPassword(passwordEncriptada);
-        usuario.setRol(Rol.ROLE_CLIENTE);
+        //ASIGNAR UN ROL POR DEFAULT
+        usuario.setRol(Rol.ROLE_USUARIO);
         return usuarioRepository.save(usuario);
     }
 
-    public Usuario guardarAdmin(Usuario usuario) {
-        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo ya está registrado");
-        }
-        String passwordEncriptada = passwordEncoder.encode(usuario.getPassword());
-        usuario.setPassword(passwordEncriptada);
-        usuario.setRol(Rol.ROLE_ADMIN);
-        return usuarioRepository.save(usuario);
-    }
-
-    public Usuario actualizarUsuario(Long id, Usuario usuario) {
+    //ACTUALIZAR
+    public Usuario actualizarUsuario(Long id, Usuario usuario){
         Usuario usuarioEncontrado = buscarUsuarioPorId(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        usuarioEncontrado.setNombreCompleto(usuario.getNombreCompleto());
-        usuarioEncontrado.setEmail(usuario.getEmail());
-        usuarioEncontrado.setTelefono(usuario.getTelefono());
-        usuarioEncontrado.setDireccion(usuario.getDireccion());
-
-        if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
+                .orElseThrow(()-> new RuntimeException("Usuario No Existe"));
+        if (usuario.getName() != null) {
+            usuarioEncontrado.setName(usuario.getName());
+        }
+        if (usuario.getEmail() != null) {
+            usuarioEncontrado.setEmail(usuario.getEmail());
+        }
+        if (usuario.getPhone() != null) {
+            usuarioEncontrado.setPhone(usuario.getPhone());
+        }
+        if (usuario.getRol() != null) {
+            usuarioEncontrado.setRol(usuario.getRol());
+        }
+        if (usuario.getImagen_url ()!= null){
+            usuarioEncontrado.setImagen_url(usuario.getImagen_url());
+        }
+        if (usuario.getAddress ()!= null){
+            usuarioEncontrado.setAddress(usuario.getAddress());
+        }
+        // La contraseña ya la teníamos bien validada
+        if(usuario.getPassword() != null && !usuario.getPassword().isEmpty()){
             usuarioEncontrado.setPassword(passwordEncoder.encode(usuario.getPassword()));
         }
 
         return usuarioRepository.save(usuarioEncontrado);
     }
 
-    public void eliminarUsuario(Long id) {
-        Usuario usuario = buscarUsuarioPorId(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        usuarioRepository.delete(usuario);
+    //ELIMINAR
+    public void eliminarUsuario(Long id){
+        Usuario usuarioEncontrado = buscarUsuarioPorId(id)
+                .orElseThrow(()-> new RuntimeException(("Usuario no encontrado")));
+        usuarioRepository.delete(usuarioEncontrado);
     }
 
+    //AUTENTICACION
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-
-        return org.springframework.security.core.userdetails.User.builder()
+                .orElseThrow(()-> new UsernameNotFoundException("Usuario no encontreado"));
+        return User.builder()
                 .username(usuario.getEmail())
                 .password(usuario.getPassword())
-                .authorities("ROLE_" + usuario.getRol().name())
+                .authorities(usuario.getRol().name())
                 .build();
     }
 
-    public Usuario validarLogin(String email, String password) {
+    //VALIDAR EL LOGIN
+    public Usuario validadLogin(String email, String password){
+        //TRAER LOS DATOS REALES DEL USUARIO
         UserDetails userDetails = loadUserByUsername(email);
-        if (passwordEncoder.matches(password, userDetails.getPassword())) {
+        //COMPARA EL TEXTO PLANO DELA CONTRASEÑA CON EL HASH DE LA BASE DE DATOS
+        if(passwordEncoder.matches(password, userDetails.getPassword())){
             return usuarioRepository.findByEmail(email).get();
         }
-        throw new RuntimeException("Credenciales inválidas");
+        throw new RuntimeException("Error de autenticación");
     }
 
-    public boolean existeEmail(String email) {
-        return usuarioRepository.findByEmail(email).isPresent();
-    }
 }

@@ -1,50 +1,43 @@
 package com.mtxparts.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mtxparts.api.role.Rol;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "usuarios")
 @Data
 @NoArgsConstructor
+@Table(name="usuarios")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    @NotBlank
-    @Size(min = 5, max = 100)
-    private String nombreCompleto;
+    @Size(max=20,min=3)
+    private String name;
 
-    @Column(unique = true, nullable = false)
-    @NotBlank
-    @Email
+    @Column(unique=true)
     private String email;
 
-    @Column(nullable = false)
-    @NotBlank
+    private String phone;
+
     private String password;
 
-    @Column(length = 20)
-    private String telefono;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Rol rol;
 
-    @Column(length = 500)
-    private String direccion;
+    @Column(nullable = false)
+    private String address;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private List<Pedido> pedidos = new ArrayList<>();
+    @Column(nullable = false)
+    private String imagen_url;
 }

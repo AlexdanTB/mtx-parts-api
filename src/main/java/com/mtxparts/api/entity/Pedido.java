@@ -1,14 +1,17 @@
 package com.mtxparts.api.entity;
 
-import com.mtxparts.api.type.StatusPedido;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mtxparts.api.entity.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.itsqmet.api_mtx.type.StatusPedido;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 @Table(name = "pedidos")
@@ -37,6 +40,7 @@ public class Pedido {
     @Column(length = 500)
     private String direccionEnvio;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DetallePedido> detalles = new ArrayList<>();
+    private List<com.itsqmet.api_mtx.entity.DetallePedido> detalles = new ArrayList<>();
 }

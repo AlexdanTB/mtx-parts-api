@@ -1,5 +1,6 @@
 package com.mtxparts.api.service;
 
+
 import com.mtxparts.api.entity.Producto;
 import com.mtxparts.api.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,4 +68,5 @@ public class ProductoService {
         producto.setStock(producto.getStock() - cantidad);
         productoRepository.save(producto);
     }
+
 }

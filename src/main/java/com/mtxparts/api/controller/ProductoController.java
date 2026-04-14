@@ -1,5 +1,6 @@
 package com.mtxparts.api.controller;
 
+
 import com.mtxparts.api.entity.Producto;
 import com.mtxparts.api.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,9 @@ public class ProductoController {
     public ResponseEntity<?> getProductos(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) Boolean disponibles) {
-        
+
         List<Producto> productos;
-        
+
         if (nombre != null && !nombre.isEmpty()) {
             productos = productoService.buscarPorNombre(nombre);
         } else if (Boolean.TRUE.equals(disponibles)) {
@@ -32,7 +33,7 @@ public class ProductoController {
         } else {
             productos = productoService.leerProductos();
         }
-        
+
         return ResponseEntity.ok(Map.of("success", true, "data", productos));
     }
 
@@ -71,6 +72,7 @@ public class ProductoController {
                     .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {

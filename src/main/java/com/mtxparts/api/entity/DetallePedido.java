@@ -1,9 +1,10 @@
 package com.mtxparts.api.entity;
 
+import com.mtxparts.api.entity.Pedido;
+import com.mtxparts.api.entity.Producto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 
 @Entity

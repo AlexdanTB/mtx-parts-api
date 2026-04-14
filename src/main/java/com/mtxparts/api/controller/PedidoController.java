@@ -1,5 +1,6 @@
 package com.mtxparts.api.controller;
 
+
 import com.mtxparts.api.entity.DetallePedido;
 import com.mtxparts.api.entity.Pedido;
 import com.mtxparts.api.entity.Producto;
@@ -22,38 +23,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/pedidos")
 public class PedidoController {
-
     @Autowired
     private PedidoService pedidoService;
 
     @Autowired
     private UsuarioService usuarioService;
-
-    @GetMapping
-    public ResponseEntity<?> getPedidos(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "message", "No autenticado"));
-        }
-
-        Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(userDetails.getUsername());
-        if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("success", false, "message", "Usuario no encontrado"));
-        }
-
-        Usuario usuario = usuarioOpt.get();
-        List<Pedido> pedidos;
-
-        if (userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            pedidos = pedidoService.leerPedidos();
-        } else {
-            pedidos = pedidoService.obtenerPedidosPorUsuario(usuario);
-        }
-
-        return ResponseEntity.ok(Map.of("success", true, "data", pedidos));
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPedidoPorId(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
@@ -85,18 +59,17 @@ public class PedidoController {
 
     @PostMapping
     public ResponseEntity<?> crearPedido(
-            @RequestBody Map<String, Object> datos,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestBody Map<String, Object> datos) {
         try {
-            if (userDetails == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("success", false, "message", "No autenticado"));
-            }
 
-            Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(userDetails.getUsername());
+            Long usuarioId = Long.valueOf(datos.get("usuarioId").toString());
+            Optional<Usuario> usuarioOpt = usuarioService
+                    .buscarUsuarioPorId(usuarioId);
+
             if (usuarioOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("success", false, "message", "Usuario no encontrado"));
+                        .body(Map.of("success", false,
+                                "message", "Usuario no encontrado"));
             }
 
             @SuppressWarnings("unchecked")
@@ -167,5 +140,22 @@ public class PedidoController {
             return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "message", "Estado inválido"));
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getTodosPedidos() {
+        return ResponseEntity.ok(Map.of("success", true,
+                "data", pedidoService.leerPedidos()));
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<?> getPedidosPorUsuario(
+            @PathVariable Long usuarioId) {
+        Optional<Usuario> usuario = usuarioService.buscarUsuarioPorId(usuarioId);
+        if (usuario.isEmpty())
+            return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(Map.of("success", true,
+                "data", pedidoService
+                        .obtenerPedidosPorUsuario(usuario.get())));
     }
 }

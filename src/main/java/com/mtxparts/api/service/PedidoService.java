@@ -1,5 +1,6 @@
 package com.mtxparts.api.service;
 
+
 import com.mtxparts.api.entity.DetallePedido;
 import com.mtxparts.api.entity.Pedido;
 import com.mtxparts.api.entity.Producto;
@@ -7,9 +8,9 @@ import com.mtxparts.api.entity.Usuario;
 import com.mtxparts.api.repository.DetallePedidoRepository;
 import com.mtxparts.api.repository.PedidoRepository;
 import com.mtxparts.api.type.StatusPedido;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,7 +19,6 @@ import java.util.Optional;
 
 @Service
 public class PedidoService {
-
     @Autowired
     private PedidoRepository pedidoRepository;
 
@@ -26,7 +26,7 @@ public class PedidoService {
     private DetallePedidoRepository detallePedidoRepository;
 
     @Autowired
-    private ProductoService productoService;
+    private com.itsqmet.api_mtx.service.ProductoService productoService;
 
     public List<Pedido> leerPedidos() {
         return pedidoRepository.findAll();
