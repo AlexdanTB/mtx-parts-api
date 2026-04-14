@@ -28,32 +28,6 @@ public class PedidoController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @GetMapping
-    public ResponseEntity<?> getPedidos(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "message", "No autenticado"));
-        }
-
-        Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(userDetails.getUsername());
-        if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("success", false, "message", "Usuario no encontrado"));
-        }
-
-        Usuario usuario = usuarioOpt.get();
-        List<Pedido> pedidos;
-
-        if (userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            pedidos = pedidoService.leerPedidos();
-        } else {
-            pedidos = pedidoService.obtenerPedidosPorUsuario(usuario);
-        }
-
-        return ResponseEntity.ok(Map.of("success", true, "data", pedidos));
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getPedidoPorId(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
@@ -87,10 +61,6 @@ public class PedidoController {
             @RequestBody Map<String, Object> datos,
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            if (userDetails == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("success", false, "message", "No autenticado"));
-            }
 
             Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(userDetails.getUsername());
             if (usuarioOpt.isEmpty()) {
