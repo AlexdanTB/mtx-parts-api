@@ -26,7 +26,7 @@ public class PedidoService {
     private DetallePedidoRepository detallePedidoRepository;
 
     @Autowired
-    private com.itsqmet.api_mtx.service.ProductoService productoService;
+    private ProductoService productoService;
 
     public List<Pedido> leerPedidos() {
         return pedidoRepository.findAll();
