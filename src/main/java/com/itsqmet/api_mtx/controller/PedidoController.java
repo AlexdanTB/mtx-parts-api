@@ -58,14 +58,17 @@ public class PedidoController {
 
     @PostMapping
     public ResponseEntity<?> crearPedido(
-            @RequestBody Map<String, Object> datos,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestBody Map<String, Object> datos) {
         try {
 
-            Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(userDetails.getUsername());
+            Long usuarioId = Long.valueOf(datos.get("usuarioId").toString());
+            Optional<Usuario> usuarioOpt = usuarioService
+                    .buscarUsuarioPorId(usuarioId);
+
             if (usuarioOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("success", false, "message", "Usuario no encontrado"));
+                        .body(Map.of("success", false,
+                                "message", "Usuario no encontrado"));
             }
 
             @SuppressWarnings("unchecked")
@@ -136,5 +139,22 @@ public class PedidoController {
             return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "message", "Estado inválido"));
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getTodosPedidos() {
+        return ResponseEntity.ok(Map.of("success", true,
+                "data", pedidoService.leerPedidos()));
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<?> getPedidosPorUsuario(
+            @PathVariable Long usuarioId) {
+        Optional<Usuario> usuario = usuarioService.buscarUsuarioPorId(usuarioId);
+        if (usuario.isEmpty())
+            return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(Map.of("success", true,
+                "data", pedidoService
+                        .obtenerPedidosPorUsuario(usuario.get())));
     }
 }

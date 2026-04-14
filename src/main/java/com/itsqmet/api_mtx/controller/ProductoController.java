@@ -58,7 +58,7 @@ public class ProductoController {
                 .body(Map.of("success", false, "message", "Producto no encontrado"));
     }
 
-    @PostMapping("/guardarProducto")
+    @PostMapping
     public ResponseEntity<?> crearProducto(@RequestBody Producto producto) {
         try {
             if (productoService.existeSku(producto.getSku())) {
